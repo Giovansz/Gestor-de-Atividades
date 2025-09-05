@@ -122,6 +122,105 @@ def menu():
     print('\033[36mO que deseja fazer?\n(C)adastrar / (E)ditar / (A)pagar / (V)isualizar / (S)air\033[m')
     return input('Escolha uma opção: ').strip().upper()
 
+
+def cadastrar_atividade(atividades):
+    print('\033[36mCadastro de Atividades\033[m')
+    separador()
+
+    nome = pedir_input('Nome da atividade: ')
+    descricao = pedir_input('Descrição da atividade: ')
+
+    while True:
+        inicio_str = pedir_input('Prazo inicial [dd/mm/aaaa]: ')
+        inicio = converter_data(inicio_str)
+        if inicio: break
+        erro('Data inválida. Use o formato dd/mm/aaaa.')
+
+    while True:
+        fim_str = pedir_input('Prazo final [dd/mm/aaaa]: ')
+        fim = converter_data(fim_str)
+        if fim and fim >= inicio: break
+        erro('Data inválida ou menor que o prazo inicial.')
+
+    mostrar_painel_prioridade()
+    prioridade = pedir_numero('Digite a prioridade (1-3): ', 1, 3)
+
+    atividade = {
+        'id': len(atividades) + 1,
+        'nome': nome,
+        'descricao': descricao,
+        'inicio': inicio,
+        'fim': fim,
+        'prioridade': prioridade
+    }
+    atividades.append(atividade)
+    sucesso(f'Atividade "{nome}" cadastrada com sucesso!')
+
+
+def editar_atividade(atividades):
+    if not atividades:
+        erro('Não há atividades para editar.')
+        return
+
+    exibir_atividades(atividades)
+    indice = pedir_numero('Digite o número da atividade que deseja editar: ', 1, len(atividades)) - 1
+    atividade = atividades[indice]
+
+    print("\033[36mO que deseja editar?\033[m")
+    print("1 - Nome\n2 - Descrição\n3 - Prazo inicial\n4 - Prazo final\n5 - Prioridade\n6 - Editar tudo")
+    escolha = pedir_numero("Escolha uma opção: ", 1, 6)
+
+    if escolha == 1:
+        atividade['nome'] = pedir_input("Novo nome: ")
+    elif escolha == 2:
+        atividade['descricao'] = pedir_input("Nova descrição: ")
+    elif escolha == 3:
+        while True:
+            inicio_str = pedir_input("Novo prazo inicial [dd/mm/aaaa]: ")
+            inicio = converter_data(inicio_str)
+            if inicio:
+                atividade['inicio'] = inicio
+                break
+            erro("Data inválida.")
+    elif escolha == 4:
+        while True:
+            fim_str = pedir_input("Novo prazo final [dd/mm/aaaa]: ")
+            fim = converter_data(fim_str)
+            if fim and fim >= atividade['inicio']:
+                atividade['fim'] = fim
+                break
+            erro("Data inválida ou menor que o prazo inicial.")
+    elif escolha == 5:
+        mostrar_painel_prioridade()
+        atividade['prioridade'] = pedir_numero("Nova prioridade (1-3): ", 1, 3)
+    elif escolha == 6:
+        atividade['nome'] = pedir_input("Novo nome: ")
+        atividade['descricao'] = pedir_input("Nova descrição: ")
+        atividade['inicio'] = converter_data(pedir_input("Novo prazo inicial [dd/mm/aaaa]: "))
+        atividade['fim'] = converter_data(pedir_input("Novo prazo final [dd/mm/aaaa]: "))
+        mostrar_painel_prioridade()
+        atividade['prioridade'] = pedir_numero("Nova prioridade (1-3): ", 1, 3)
+
+    sucesso("Atividade atualizada com sucesso!")
+
+
+def apagar_atividade(atividades):
+    if not atividades:
+        erro('Não há atividades para apagar.')
+        return
+    exibir_atividades(atividades)
+    indice = pedir_numero('Digite o número da atividade que deseja apagar: ', 1, len(atividades)) - 1
+    atividades.pop(indice)
+    sucesso('Atividade apagada com sucesso.')
+
+
+def visualizar_atividades(atividades):
+    if not atividades:
+        erro('Não há atividades para visualizar.')
+        return
+    atividades_ordenadas = sorted(atividades, key=lambda x: x['prioridade'])
+    exibir_atividades(atividades_ordenadas)
+
 # Base do programa
 def main():
     usuarios = []
@@ -147,131 +246,23 @@ def main():
     # Loop de atividades
     while True:
         opcao = menu()
-        # Sair
         if opcao == 'S':
             sucesso('Encerrando serviço de atividades.')
             exibir_atividades(atividades)
             break
         
-        # Cadastro
         elif opcao == 'C':
-            print('\033[36mCadastro de Atividades\033[m')
+            cadastrar_atividade(atividades)
             separador()
-            nome_atividade = pedir_input('Nome da atividade: ')
-            descricao = pedir_input('Descrição da atividade: ')
 
-            while True:
-                inicio_str = pedir_input('Prazo inicial [dd/mm/aaaa]: ')
-                inicio = converter_data(inicio_str)
-                if inicio:
-                    break
-                erro('Data inválida. Use o formato dd/mm/aaaa.')
-
-            while True:
-                fim_str = pedir_input('Prazo final [dd/mm/aaaa]: ')
-                fim = converter_data(fim_str)
-                if fim and fim >= inicio:
-                    break
-                erro('Data inválida ou menor que o prazo inicial.')
-
-            mostrar_painel_prioridade()
-            prioridade = pedir_numero('Digite a prioridade (1-3): ', 1, 3)
-
-            atividade = {
-                'id': len(atividades) + 1,
-                'nome': nome_atividade,
-                'descricao': descricao,
-                'inicio': inicio,
-                'fim': fim,
-                'prioridade': prioridade
-            }
-            atividades.append(atividade)
-            sucesso(f'Atividade "{nome_atividade}" cadastrada com sucesso!')
-
-        # Edição
         elif opcao == 'E':
-            if not atividades:
-                erro('Não há atividades para editar.')
-                continue
-            exibir_atividades(atividades)
-            indice = pedir_numero('Digite o número da atividade que deseja editar: ', 1, len(atividades)) - 1
-            atividade = atividades[indice]
+            editar_atividade(atividades)
 
-            while True:
-                print("\033[36mO que deseja editar?\033[m")
-                print("1 - Nome\n2 - Descrição\n3 - Prazo inicial\n4 - Prazo final\n5 - Prioridade\n6 - Editar tudo\n0 - Cancelar")
-                escolha = pedir_numero("Escolha uma opção: ", 0, 6)
-
-                if escolha == 0:
-                    sucesso("Edição cancelada.")
-                    break
-                elif escolha == 1:
-                    atividade['nome'] = pedir_input("Novo nome da atividade: ")
-                    sucesso("Nome atualizado com sucesso!")
-                elif escolha == 2:
-                    atividade['descricao'] = pedir_input("Nova descrição: ")
-                    sucesso("Descrição atualizada com sucesso!")
-                elif escolha == 3:
-                    while True:
-                        inicio_str = pedir_input("Novo prazo inicial [dd/mm/aaaa]: ")
-                        inicio = converter_data(inicio_str)
-                        if inicio:
-                            atividade['inicio'] = inicio
-                            sucesso("Prazo inicial atualizado com sucesso!")
-                            break
-                        erro("Data inválida. Use o formato dd/mm/aaaa.")
-                elif escolha == 4:
-                    while True:
-                        fim_str = pedir_input("Novo prazo final [dd/mm/aaaa]: ")
-                        fim = converter_data(fim_str)
-                        if fim and fim >= atividade['inicio']:
-                            atividade['fim'] = fim
-                            sucesso("Prazo final atualizado com sucesso!")
-                            break
-                    erro("Data inválida ou menor que o prazo inicial.")
-                elif escolha == 5:
-                    mostrar_painel_prioridade()
-                    atividade['prioridade'] = pedir_numero("Nova prioridade (1-3): ", 1, 3)
-                    sucesso("Prioridade atualizada com sucesso!")
-                elif escolha == 6:
-                    atividade['nome'] = pedir_input("Novo nome da atividade: ")
-                    atividade['descricao'] = pedir_input("Nova descrição: ")
-                    while True:
-                        inicio_str = pedir_input("Novo prazo inicial [dd/mm/aaaa]: ")
-                        inicio = converter_data(inicio_str)
-                        if inicio:
-                            atividade['inicio'] = inicio
-                            break
-                    erro("Data inválida. Use o formato dd/mm/aaaa.")
-                    while True:
-                        fim_str = pedir_input("Novo prazo final [dd/mm/aaaa]: ")
-                        fim = converter_data(fim_str)
-                        if fim and fim >= atividade['inicio']:
-                            atividade['fim'] = fim
-                            break
-                        erro("Data inválida ou menor que o prazo inicial.")
-
-            sucesso("Atividade editada com sucesso!")
-            break
-        
-        # Apagar atividades
         elif opcao == 'A':
-            if not atividades:
-                erro('Não há atividades para apagar.')
-                continue
-            exibir_atividades(atividades)
-            indice = pedir_numero('Digite o número da atividade que deseja apagar: ', 1, len(atividades)) - 1
-            atividades.pop(indice)
-            sucesso('Atividade apagada com sucesso.')
+            apagar_atividade(atividades)
 
-        # Visualizar atividades
         elif opcao == 'V':
-            if not atividades:
-                erro('Não há atividades para visualizar.')
-                continue
-            # Exibe em ordem de prioridade
-            atividades_ordenadas = sorted(atividades, key=lambda x: x['prioridade'])
-            exibir_atividades(atividades_ordenadas)
+            visualizar_atividades(atividades)
 
         else:
             erro('Opção inválida.')
