@@ -122,7 +122,7 @@ def menu():
     print('\033[36mO que deseja fazer?\n(C)adastrar / (E)ditar / (A)pagar / (V)isualizar / (S)air\033[m')
     return input('Escolha uma opção: ').strip().upper()
 
-
+# Cadastro de atividades
 def cadastrar_atividade(atividades):
     print('\033[36mCadastro de Atividades\033[m')
     separador()
@@ -156,7 +156,7 @@ def cadastrar_atividade(atividades):
     atividades.append(atividade)
     sucesso(f'Atividade "{nome}" cadastrada com sucesso!')
 
-
+# Edição de atividades
 def editar_atividade(atividades):
     if not atividades:
         erro('Não há atividades para editar.')
@@ -203,7 +203,7 @@ def editar_atividade(atividades):
 
     sucesso("Atividade atualizada com sucesso!")
 
-
+# Apagar atividades
 def apagar_atividade(atividades):
     if not atividades:
         erro('Não há atividades para apagar.')
@@ -213,7 +213,7 @@ def apagar_atividade(atividades):
     atividades.pop(indice)
     sucesso('Atividade apagada com sucesso.')
 
-
+# Visualizar atividades
 def visualizar_atividades(atividades):
     if not atividades:
         erro('Não há atividades para visualizar.')
@@ -221,7 +221,7 @@ def visualizar_atividades(atividades):
     atividades_ordenadas = sorted(atividades, key=lambda x: x['prioridade'])
     exibir_atividades(atividades_ordenadas)
 
-# Base do programa
+# Função principal
 def main():
     usuarios = []
     atividades = []
